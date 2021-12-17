@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: golang-api
+  labels:
+    app: golang-api
+spec:
+  replicas: 3
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: golang-api
+  template:
+    metadata:
+      labels:
+        app: golang-api
+    spec:
+      imagePullSecrets:
+        - name: us-east-1-ecr-registry
+      containers:
+        - name: golang-api
+          image: golang-api
+          imagePullPolicy: Always
+          ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 5m
+  strategy:
+    blueGreen:
+      autoPromotionEnabled: true
+      activeService: golang-api
+      previewService: golang-api-preview
